@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>l8r.chat Preview</title>
+  <meta name="description" content="Static guided chat prototype for l8r.chat.">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --purple: #7c3aed;
+      --amber: #d97706;
+      --shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 36rem),
+        radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.12), transparent 34rem),
+        var(--bg);
+      color: var(--ink);
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+    }
+
+    main {
+      width: min(100%, 460px);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero {
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 8vw, 4rem);
+      letter-spacing: -0.08em;
+      line-height: 0.9;
+    }
+
+    .tagline {
+      margin: 0.5rem 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .phone {
+      background: #0f172a;
+      border-radius: 2.5rem;
+      padding: 0.75rem;
+      box-shadow: var(--shadow);
+    }
+
+    .screen {
+      background: var(--card);
+      border-radius: 2rem;
+      min-height: 690px;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      padding: 1.1rem 1.2rem;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      flex: 0 0 auto;
+    }
+
+    .brand strong,
+    .brand span {
+      display: block;
+    }
+
+    .brand span {
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .flow-pill {
+      border: 1px solid var(--line);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.4rem 0.65rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .messages {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow: hidden;
+    }
+
+    .bubble {
+      max-width: 86%;
+      border-radius: 1.15rem;
+      padding: 0.8rem 0.9rem;
+      line-height: 1.32;
+      animation: rise 280ms ease-out both;
+      font-size: 0.96rem;
+    }
+
+    .agent {
+      background: #f3f4f6;
+      align-self: flex-start;
+    }
+
+    .user {
+      background: var(--blue);
+      color: white;
+      align-self: flex-end;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-self: flex-start;
+      animation: rise 280ms ease-out both;
+    }
+
+    button,
+    .chip {
+      appearance: none;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      background: white;
+      color: var(--blue);
+      padding: 0.65rem 0.8rem;
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .composer {
+      border-top: 1px solid var(--line);
+      padding: 0.8rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.55rem;
+    }
+
+    input {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.8rem 1rem;
+      font: inherit;
+      min-width: 0;
+    }
+
+    .send {
+      background: var(--ink);
+      color: white;
+      border-color: var(--ink);
+      padding-inline: 1rem;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.45rem;
+    }
+
+    .tabs button {
+      border-color: var(--line);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.7);
+      padding: 0.7rem 0.25rem;
+      font-size: 0.78rem;
+    }
+
+    .tabs button[aria-pressed="true"] {
+      color: white;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin: 0;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(0.45rem);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 390px) {
+      .screen { min-height: 640px; }
+      .bubble { font-size: 0.9rem; }
+      button, .chip { font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero" aria-labelledby="title">
+      <h1 id="title">l8r.chat</h1>
+      <p class="tagline">Find free time, fast. See you later.</p>
+    </section>
+
+    <section class="phone" aria-label="Animated l8r.chat prototype">
+      <div class="screen">
+        <header>
+          <div class="brand">
+            <div class="avatar" aria-hidden="true">l8r</div>
+            <div>
+              <strong>l8r</strong>
+              <span>guided chat scheduling</span>
+            </div>
+          </div>
+          <div class="flow-pill" id="flowLabel">Friend</div>
+        </header>
+
+        <div class="messages" id="messages" aria-live="polite"></div>
+
+        <form class="composer">
+          <input aria-label="Optional message" placeholder="Type, tap, or reply by text">
+          <button class="send" type="button">Send</button>
+        </form>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Preview flows">
+      <button type="button" data-flow="0" aria-pressed="true">Friend</button>
+      <button type="button" data-flow="1" aria-pressed="false">Service</button>
+      <button type="button" data-flow="2" aria-pressed="false">Payment</button>
+      <button type="button" data-flow="3" aria-pressed="false">Docs</button>
+    </nav>
+
+    <p class="note">Static HTML/CSS/JavaScript only. No framework. No build step.</p>
+  </main>
+
+  <script>
+    const flows = [
+      {
+        label: "Friend",
+        turns: [
+          { who: "agent", text: "Who are you trying to make time for?", chips: ["Friend", "Date", "Family", "Coworker", "Service provider"] },
+          { who: "user", text: "Friend" },
+          { who: "agent", text: "What do you want to make time for?", chips: ["Coffee", "Dinner", "Catch up", "Walk", "Call"] },
+          { who: "user", text: "Catch up" },
+          { who: "agent", text: "Here are a few ways to ask:", chips: ["Want to catch up this week?", "Got time for coffee soon?", "Want to find a time to hang?"] }
+        ]
+      },
+      {
+        label: "Service",
+        turns: [
+          { who: "agent", text: "What do you need?", chips: ["Haircut", "Nails", "Massage", "Tattoo", "Consult", "Repair"] },
+          { who: "user", text: "Haircut" },
+          { who: "agent", text: "What kind of haircut request?", chips: ["First available", "Same barber", "Specific day", "Before an event", "Price check + appointment"] },
+          { who: "user", text: "Specific day" },
+          { who: "agent", text: "I can ask Shaz for Thursday afternoon.", chips: ["Yes, ask", "Edit", "Add details"] }
+        ]
+      },
+      {
+        label: "Payment",
+        turns: [
+          { who: "agent", text: "Shaz requires a $25 deposit to hold Thursday at 2:30.", chips: ["Pay deposit", "Ask a question", "Pick another time"] },
+          { who: "user", text: "Pay deposit" },
+          { who: "agent", text: "Secure payment link ready.", chips: ["Pay $25", "Cancel"] },
+          { who: "user", text: "Pay $25" },
+          { who: "agent", text: "Deposit received. Haircut confirmed for Thursday at 2:30.", chips: ["Add reminder", "Done"] }
+        ]
+      },
+      {
+        label: "Documents",
+        turns: [
+          { who: "agent", text: "Shaz needs a reference photo before confirming.", chips: ["Upload photo", "Use camera", "Ask why"] },
+          { who: "user", text: "Upload photo" },
+          { who: "agent", text: "Photo received. Want to send it to Shaz?", chips: ["Send", "Replace", "Cancel"] },
+          { who: "user", text: "Send" },
+          { who: "agent", text: "Looks good. Ready to confirm Thursday at 2:30.", chips: ["Confirm", "Suggest other time"] }
+        ]
+      }
+    ];
+
+    const messages = document.querySelector("#messages");
+    const flowLabel = document.querySelector("#flowLabel");
+    const tabs = [...document.querySelectorAll(".tabs button")];
+    let flowIndex = 0;
+    let turnIndex = 0;
+    let timer;
+
+    function renderTurn(turn) {
+      const bubble = document.createElement("div");
+      bubble.className = `bubble ${turn.who}`;
+      bubble.textContent = turn.text;
+      messages.appendChild(bubble);
+
+      if (turn.chips) {
+        const chips = document.createElement("div");
+        chips.className = "chips";
+        for (const label of turn.chips) {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "chip";
+          chip.textContent = label;
+          chips.appendChild(chip);
+        }
+        messages.appendChild(chips);
+      }
+    }
+
+    function setFlow(index) {
+      flowIndex = index;
+      turnIndex = 0;
+      messages.innerHTML = "";
+      flowLabel.textContent = flows[flowIndex].label;
+      tabs.forEach((tab, idx) => tab.setAttribute("aria-pressed", String(idx === flowIndex)));
+      clearInterval(timer);
+      tick();
+      timer = setInterval(tick, 1150);
+    }
+
+    function tick() {
+      const flow = flows[flowIndex];
+
+      if (turnIndex >= flow.turns.length) {
+        clearInterval(timer);
+        timer = setTimeout(() => setFlow((flowIndex + 1) % flows.length), 1600);
+        return;
+      }
+
+      renderTurn(flow.turns[turnIndex]);
+      turnIndex += 1;
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => setFlow(Number(tab.dataset.flow)));
+    });
+
+    setFlow(0);
+  </script>
+</body>
+</html>
